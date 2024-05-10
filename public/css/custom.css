@@ -1,0 +1,113 @@
+body {
+  font-family: 'Roboto', sans-serif;
+  /* Fuente Roboto, adecuada para legibilidad y estilo moderno */
+  background-color: #FFFFFF;
+  /* Crema claro para el fondo general */
+  color: #26798E;
+  /* Azul Oscuro para el texto, proporciona buen contraste */
+  margin: 0;
+  padding: 0;
+}
+
+body::-webkit-scrollbar {
+  width: 15px;               /* width of the entire scrollbar */
+}
+
+body::-webkit-scrollbar-track {
+  background: #FFFFFF;
+}
+
+body::-webkit-scrollbar-thumb {
+background-color: #CCCC;
+border-radius: 20px;
+border: 3px solid #FFFFFF;
+}
+
+/* Estilo general de la barra de navegación */
+.topnav{
+  background: #26798E !important; /* Azul Oscuro */
+}
+
+.topnav .navbar {
+  background-color: #26798E !important; /* Azul Oscuro */
+  background: #26798E !important; /* Azul Oscuro */
+  color: #FFFFFF;
+}
+
+/* Estilos para los enlaces en la barra de navegación */
+.topnav .navbar-nav .nav-link {
+  color: #FFFFFF; /* Blanco para contraste */
+}
+
+/* Estilos para los ítems del menú desplegable en su estado normal y hover */
+.topnav .navbar-nav .nav-item .dropdown-menu {
+  border: none;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  background-color: #26798E; /* Verde Agua para el fondo de los menús desplegables */
+}
+
+.topnav .navbar-nav .nav-item .dropdown-menu .dropdown-item {
+  border-radius: 5px;
+  color: #FFFFFF; /* Azul Oscuro para los enlaces */
+}
+
+.topnav .navbar-nav .nav-item .dropdown-menu .dropdown-item:hover {
+  background-color: #FFC172; /* Amarillo Crema para el fondo en hover */
+  color: #26798E; /* Azul Oscuro para el texto */
+}
+
+/* Estilo para la flecha del menú desplegable */
+.topnav .navbar-nav .nav-item .dropdown-toggle .arrow-down {
+  border-top-color: #FFFFFF; /* Blanco para la flecha desplegable */
+}
+
+/* Cambiar el color de la flecha en hover */
+.topnav .navbar-nav .nav-item .dropdown-toggle:hover .arrow-down,
+.topnav .navbar-nav .nav-item .dropdown-toggle:focus .arrow-down {
+  border-top-color: #FFC172; /* Amarillo Crema para la flecha en hover */
+}
+
+/* Estilos adicionales para los iconos dentro de los enlaces */
+.topnav .navbar-nav .nav-link .uil {
+  color: #FFE3B3; /* Crema Claro para los iconos */
+  margin-right: 5px; /* Espacio a la derecha del icono */
+}
+
+
+
+/* Estilos básicos para tablas */
+.table {
+  width: 100%;
+  border-radius: 5px;
+  background-color: #FFFFFF;
+  /* Fondo blanco para las tablas para máxima legibilidad */
+  border-collapse: collapse;
+  /* Elimina el espacio entre los bordes de las celdas */
+}
+
+.table th, .table td {
+  padding: 8px;
+  /* Espaciado dentro de las celdas */
+  text-align: left;
+  /* Alineación del texto a la izquierda */
+  /* Línea bajo cada fila con el Verde Agua */
+}
+
+.table thead th {
+  background-color: #26798E;
+  /* Azul Oscuro para la cabecera de la tabla */
+  color: #FFFFFF;
+  /* Texto blanco en la cabecera para contraste */
+}
+
+.table tbody tr:hover {
+  background-color: #FFC172;
+  /* Amarillo Crema al pasar el mouse para resaltar */
+}
+
+/* Estilos adicionales para mejorar la visualización */
+.table tbody td {
+  color: #26798E;
+  /* Azul Oscuro para el texto dentro de las celdas */
+}
