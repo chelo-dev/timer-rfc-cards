@@ -29,9 +29,6 @@
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet" type="text/css" id="custom" />
     <link href="{{ asset('css/loader.css') }}" rel="stylesheet" type="text/css" id="loader" />
 
-    <!-- VueJs -->
-    {{-- <link href="{{ mix('/css/app.css') }}" rel="stylesheet"> --}}
-
     @yield('css')
 
 </head>
@@ -99,14 +96,15 @@
     <!-- end -->
 
     {{-- Funcion global para realizar peticiones --}}
+    <script>
+        var csrfToken = '{{ csrf_token() }}';
+    </script>
+    
     <script src="{{ asset('js/http_request.js') }}"></script>
 
     <!-- demo app -->
     {{-- <script src="{{ asset('assets/js/pages/demo.dashboard.js') }}"></script> --}}
     <!-- end demo js-->
-
-    <!-- VueJs -->
-    <script src="{{ mix('/js/app.js') }}"></script>
 
     @yield('js')
 </body>

@@ -75,38 +75,91 @@ class UserController extends Controller
     |----------------------------------------------------------------------------------------------------
     */
 
-    public function listaUsuarios()
+    public function listUser()
     {
-        $users = User::with('roles')->select('users.*')->orderByDesc('id')->get();
-        
-        $users->transform(function ($user) {
-            return [
-                'uuid' => $user->uuid,
-                'name' => $user->name,
-                'email' => $user->email,
-                'department' => $user->department,
-                'position' => $user->position,
-                'is_active' => $user->is_active,
-                // 'last_login' => $user->last_login,
-                'phone' => $user->phone,
-                // 'notes' => $user->notes,
-                'role' => $user->roles->first()->name ?? 'N/A',
-                'created_at' => $user->created_at,
-            ];
-        });
+        $users = User::with('roles')
+            ->select('users.*')
+            ->orderByDesc('id');
 
-        return $this->shared->sendResponse($users, 'Lista de usuarios.');
+        $departments = [
+            ['id' => 1, 'name' => 'Ventas'],
+            ['id' => 2, 'name' => 'Recursos Humanos'],
+            ['id' => 3, 'name' => 'Sistemas'],
+            ['id' => 4, 'name' => 'Intendencia'],
+            ['id' => 5, 'name' => 'Dirección'],
+            ['id' => 6, 'name' => 'Otro']
+        ];
+
+        $positions = [
+            ['id' => 1, 'name' => 'Empleado'],
+            ['id' => 2, 'name' => 'Vendedor'],
+            ['id' => 3, 'name' => 'Limpieza'],
+            ['id' => 4, 'name' => 'Soporte Tecnico'],
+            ['id' => 5, 'name' => 'Director'],
+            ['id' => 6, 'name' => 'Cordinador']
+        ];
+
+        if (request()->ajax()) {
+            return datatables()->of($users)
+                ->addColumn('options', function ($user) {
+                    return view('pages.system.users.shared.options', ['uuid' => $user->uuid]);
+                })
+                ->addColumn('is_active', function ($user) {
+                    return $user->is_active ? '<span class="badge badge-success">Activo</span>' : '<span class="badge badge-danger">Inactivo</span>';
+                })
+                ->addColumn('role', function ($user) {
+                    return $user->roles->first()->name ?? 'N/A';
+                })
+                ->addColumn('created_at', function ($user) {
+                    return date('d-m-Y H:i:s', strtotime($user->created_at));
+                })
+                ->rawColumns(['options', 'is_active'])
+                ->make(true);
+        }
+
+        return view('pages.system.users.list', compact('departments', 'positions'));
     }
 
-    public function listUser(User $users)
+    public function createUser(Request $request, User $user)
     {
         # Politica para saber si el usuario cuenta con los permisos deacuerdo a su rol asignado
-        // Gate::authorize('listUser');
+        // Gate::authorize('createUser');
+
+        $this->validate($request, [
+            'name'  => 'required|string|min:3|max:255|regex:/^[\pL\s\-]+$/u',
+            'email' => ['required', 'min:5', 'max:255', 'regex:/^[A-Za-z0-9\._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/i', 'unique:users', function ($attribute, $value, $fail) {
+                if ($value === strtoupper($value)) {
+                    $fail('El correo electrónico no puede estar todo en mayúsculas.');
+                }
+            }],
+            'department' => 'required|integer|in:1,2,3,4,5,6',
+            'position' => 'required|integer|in:1,2,3,4,5,6',
+            'phone' => 'required|regex:/^\(\d{3}\) \d{3}-\d{4}$/',
+            'notes' => 'required|min:5|max:2147483647',
+            // 'role' => 'required|integer|exists:roles,id',
+            'password' => 'required|min:5|max:25|confirmed',
+            'password_confirmation' => 'required|min:5|max:25',
+        ]);
 
         try {
-            return view('pages.system.users.list');
+
+            $userData = [
+                'name' => $request->name,
+                'email' => $request->email,
+                'department' => $request->department,
+                'position' => $request->position,
+                'is_active' => true,
+                'phone' => $request->phone,
+                'notes' => $request->notes,
+                // 'role' => optional($request->roles->first())->name ?? 'N/A',
+            ];
+
+
+            User::created($userData);
+
+            return $this->shared->sendResponse($userData, 'Deatail user.');
         } catch (Exception $error) {
-            return redirect()->route('dashboard')->with('error', $error->getMessage());
+            return $this->shared->sendError($error->getMessage());
         }
     }
 
@@ -116,9 +169,26 @@ class UserController extends Controller
         // Gate::authorize('deatailUser');
 
         try {
-            $user = User::where('uuid', $uuid)->firstOrFail();
+            $user = User::with('roles')
+                ->select('users.*')
+                ->where('uuid', $uuid)
+                ->first();
 
-            return $this->shared->sendResponse($user, 'Deatail user.');
+            $userData = [
+                'uuid' => $user->uuid,
+                'name' => $user->name,
+                'email' => $user->email,
+                'department' => $user->department,
+                'position' => $user->position,
+                'is_active' => $user->is_active,
+                'last_login' => $user->last_login,
+                'phone' => $user->phone,
+                'notes' => $user->notes,
+                'role' => optional($user->roles->first())->name ?? 'N/A',
+                'created_at' => date('d-m-Y H:i:s', strtotime($user->created_at)),
+            ];
+
+            return $this->shared->sendResponse($userData, 'Deatail user.');
         } catch (Exception $error) {
             return $this->shared->sendError($error->getMessage());
         }
@@ -128,17 +198,18 @@ class UserController extends Controller
     {
         # Politica para saber si el usuario cuenta con los permisos deacuerdo a su rol asignado
         // Gate::authorize('deleteUser');
-
+        return $this->shared->sendResponse([], 'Usuario eliminado con exito.');
         $this->validate($request, [
             'uuid' => 'required|string|exists:users,uuid',
         ]);
 
         try {
-            $user = User::findOrFail($request->uuid);
+            $user = User::where('uuid', $request->uuid)->first();
+            $user->delete();
 
             return $this->shared->sendResponse($user, 'Usuario eliminado con exito.');
         } catch (Exception $error) {
-            return $this->shared->sendError($error->getMessage(), 'Usuario eliminado con exito.', 404);
+            return $this->shared->sendError($error->getMessage(), 'Problemas al intentar eliminar el registro.', 404);
         }
     }
 }

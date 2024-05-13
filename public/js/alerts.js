@@ -3,7 +3,7 @@
 var notification = (title, icono, message) => {
 
     const operation = {
-        'Success': 'Correcto',
+        'Success': 'Success',
         'Info': 'Información',
         'Error': 'Error',
     };
@@ -22,7 +22,7 @@ var notification = (title, icono, message) => {
     else {
         $.toast({
             heading: operation[title],
-            text: 'Lo siento, no cuentas con los permisos necesarios para realizar esta acción.',
+            text: 'Lo siento pero tenemos problemas con el servidor, por favor espere un momento y si el problema persiste comuniquese con soporte tecnico.',
             showHideTransition: 'slide',
             icon: icono,
             allowToastClose: true,

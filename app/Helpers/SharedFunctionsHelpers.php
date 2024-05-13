@@ -115,8 +115,35 @@ class SharedFunctionsHelpers
         return $texto;
     }
 
-    public static function pathDocuments()
+    public function pathDocuments()
     {
-        return 'documents/';
+        $ruta = 'documents/';
+
+        return $ruta;
+    }
+
+    public function getDataMessage() 
+    {
+        return 'Datos recuperados con éxito';
+    }
+
+    public function getDataMessageError()
+    {
+        return 'Error obtener informacion';
+    }
+
+    public function messageRegisterSuccess()
+    {
+        return 'Se completó un registro con éxito.';
+    }
+
+    public function messageRegisterError()
+    {
+        return 'Error al guardar los datos';
+    }
+
+    public function messageDelete()
+    {
+        return 'Un registro fue eliminado con éxito.';
     }
 }

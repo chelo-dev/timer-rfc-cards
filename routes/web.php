@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\administration\User\UserController;
 use App\Http\Controllers\Config\LanguageController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,18 +24,5 @@ Route::middleware('web')->get('lang/{locale}', [LanguageController::class, 'chan
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth'])->name('dashboard');
-
-// Administracion cueneta
-Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
-    Route::get('/cuenta/{uuid}', [UserController::class, 'getAccount'])->name('getAccount');
-    Route::put('/cuenta/{uuid}', [UserController::class, 'editAccount'])->name('editAccount');
-});
-
-// Administracion Usuarios
-Route::group(['prefix' => 'administracion', 'middleware' => 'auth'], function () {
-    Route::get('/usuarios', [UserController::class, 'listUser'])->name('listUser');
-    Route::get('/usuario/{uuid}', [UserController::class, 'deatailUser'])->name('deatailUser');
-    Route::delete('/usuario', [UserController::class, 'deleteUser'])->name('deleteUser');
-});
 
 require __DIR__ . '/auth.php';
