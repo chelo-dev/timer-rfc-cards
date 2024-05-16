@@ -1,9 +1,10 @@
 <?php
 
 use App\Http\Controllers\administration\User\UserController;
+use App\Http\Controllers\Department\DepartmentController;
+use App\Http\Controllers\Position\PositionController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,5 +36,24 @@ Route::prefix('administration')->middleware('auth:sanctum')->controller(UserCont
     Route::get('/usuarios', 'listUser');
     Route::post('/obtener-usuario', 'deatailUser');
     Route::post('/registro-usuario', 'createUser');
+    Route::post('/editar-usuario', 'editUser');
     Route::post('/eliminar-usuario', 'deleteUser');
+});
+
+// Administración de Departamentos
+Route::prefix('administration')->middleware('auth:sanctum')->controller(DepartmentController::class)->group(function () {
+    Route::get('/departamentos', 'listDepartment');
+    Route::post('/obtener-departamento', 'showDepartment');
+    Route::post('/registro-departamento', 'createDepartment');
+    Route::post('/editar-departamento', 'editDepartment');
+    Route::post('/eliminar-departamento', 'deleteDepartment');
+});
+
+// Administración de Posiciones
+Route::prefix('administration')->middleware('auth:sanctum')->controller(PositionController::class)->group(function () {
+    Route::get('/posiciones', 'listPosition');
+    Route::post('/obtener-posicion', 'showPosition');
+    Route::post('/registro-posicion', 'createPosition');
+    Route::post('/editar-posicion', 'editPosition');
+    Route::post('/eliminar-posicion', 'deletePosition');
 });

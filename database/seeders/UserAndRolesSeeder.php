@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Department;
+use App\Models\Position;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -38,17 +40,36 @@ class UserAndRolesSeeder extends Seeder
         $adminRole = Role::create(['name' => 'Administrador']);
         $adminRole->givePermissionTo(Permission::all());
 
+        // Crear un departamento
+        $department = Department::create([
+            'uuid' => Str::uuid(),
+            'name' => 'soporte tecnico',
+            'description' => 'Personal de la direccion',
+        ]);
+
+        // Crear una posision
+        $position = Position::create([
+            'uuid' => Str::uuid(),
+            'name' => 'soporte tecnico',
+            'description' => 'Personal de soporte',
+        ]);
+
         // Crear usuario Administrador
         $user = User::create([
             'uuid' => Str::uuid(),
             'name' => 'Kharma Solutions - Admin',
             'email' => 'admin@kharma-s.com',
             'password' => Hash::make('123456'),
-            'department' => 'Administracion General',
-            'position' => 'Administracion del sistema',
             'phone' => '7775944783',
-            'is_active' => true
+            'is_active' => true,
+            'department_id' => $department->id,
+            'position_id' => $position->id,
         ]);
+
+        // TODO: Eliminar en produccion
+        $user['acces_token'] = $user->createToken('auth_token')->plainTextToken;
+        $user['token_type'] = 'Bearer';
+        $user['uuid'] = $user->uuid;
 
         // Asignar el rol de Administrador al usuario
         $user->assignRole($adminRole);
@@ -58,7 +79,7 @@ class UserAndRolesSeeder extends Seeder
         // $empleadoRol->givePermissionTo(Permission::all()); // Pendiante a crear los permisos para este rol
 
         // Crear usuario empleado
-        $empleado = User::create([
+        /*$empleado = User::create([
             'uuid' => Str::uuid(),
             'name' => 'Angel Paredes Torres',
             'email' => 'angelparedestorres.apt@gmail.com',
@@ -67,7 +88,7 @@ class UserAndRolesSeeder extends Seeder
             'position' => 'Desarrollador Full Stack',
             'phone' => '7775944783',
             'is_active' => true
-        ]);
+        ]);*/
 
         // Asignar el rol de Administrador al usuario
         // $empleado->assignRole($empleadoRol);

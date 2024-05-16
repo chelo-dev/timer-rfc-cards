@@ -5,14 +5,12 @@ namespace App\Http\Controllers\administration\User;
 use App\Helpers\SharedFunctionsHelpers;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Gate;
-use Yajra\DataTables\DataTables;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Http\Response;
 
 use function PHPUnit\Framework\isNull;
 
@@ -52,8 +50,8 @@ class UserController extends Controller
                 'name' => $account->name,
                 'email' => $account->email,
                 'role' => optional($account->roles->first())->name ?? 'N/A',
-                'department' => $account->department,
-                'position' => $account->position,
+                'department' => $account->department->name,
+                'position' => $account->position->name,
                 'is_active' => $account->is_active,
                 'last_login' => $account->last_login,
                 'phone' => $account->phone,
@@ -107,27 +105,26 @@ class UserController extends Controller
 
     public function listUser()
     {
-        $usersData[] = [];
-        $users = User::with('roles')
-            ->select('users.*')
+        $userData = [];
+        $users = User::with('roles', 'department', 'position')
+            ->whereNull('deleted_at')
             ->orderByDesc('id')
-            ->where('deleted_at', null)
             ->get();
 
-        foreach ($users as $value) {
+        foreach ($users as $user) {
             $userData[] = [
-                'uuid' => $value->uuid,
-                'name' => $value->name,
-                'email' => $value->email,
-                'department' => $value->department,
-                'position' => $value->position,
-                'is_active' => $value->is_active,
-                'phone' => $value->phone,
-                'notes' => $value->notes,
-                'last_login' => isNull($value->last_login) ? 'N/A' : date('d-m-Y H:i:s', strtotime($value->last_login)),
-                'role' => optional($value->roles->first())->name ?? 'N/A',
-                'created_at' => date('d-m-Y', strtotime($value->created_at)),
-                'updated_at' => date('d-m-Y', strtotime($value->updated_at))
+                'uuid' => $user->uuid,
+                'name' => $user->name,
+                'email' => $user->email,
+                'department' => $user->department->name,
+                'position' => $user->position->name,
+                'is_active' => $user->is_active,
+                'phone' => $user->phone,
+                'notes' => $user->notes,
+                'last_login' => isNull($user->last_login) ? 'N/A' : date('d-m-Y H:i:s', strtotime($user->last_login)),
+                'role' => optional($user->roles->first())->name ?? 'N/A',
+                'created_at' => date('d-m-Y', strtotime($user->created_at)),
+                'updated_at' => date('d-m-Y', strtotime($user->updated_at))
             ];
         }
 
@@ -146,8 +143,8 @@ class UserController extends Controller
                     $fail('El correo electrónico no puede estar todo en mayúsculas.');
                 }
             }],
-            'department' => 'required|integer|in:1,2,3,4,5,6',
-            'position' => 'required|integer|in:1,2,3,4,5,6',
+            'department_id' => 'required|integer|exists:departments,id',
+            'position_id' => 'required|integer|exists:positions,id',
             'phone' => 'required|regex:/^\(\d{3}\) \d{3}-\d{4}$/',
             'notes' => 'required|min:3|max:2147483647',
             // 'role' => 'required|integer|exists:roles,id',
@@ -161,8 +158,8 @@ class UserController extends Controller
                 'uuid' => Str::uuid(),
                 'name' => $this->shared->clearString($validatedData['name']),
                 'email' => $validatedData['email'],
-                'department' => $validatedData['department'],
-                'position' => $validatedData['position'],
+                'department_id' => $validatedData['department_id'],
+                'position_id' => $validatedData['position_id'],
                 'is_active' => true,
                 'last_login' => null,
                 'phone' => $validatedData['phone'],
@@ -189,23 +186,22 @@ class UserController extends Controller
         ]);
 
         try {
-            $user = User::with('roles')
-                ->select('users.*')
-                ->where('uuid', $validatedData['uuid'])
-                ->first();
+            $user = User::where('uuid', $validatedData['uuid'])
+                ->firstOrFail();
+            $user->load('roles');
 
             $userData = [
                 'uuid' => $user->uuid,
                 'name' => $user->name,
                 'email' => $user->email,
-                'department' => $user->department,
-                'position' => $user->position,
+                'department' => $user->department->name,
+                'position' => $user->position->name,
                 'is_active' => $user->is_active,
                 'last_login' => $user->last_login,
                 'phone' => $user->phone,
                 'notes' => $user->notes,
                 'role' => optional($user->roles->first())->name ?? 'N/A',
-                'created_at' => date('d-m-Y H:i:s', strtotime($user->created_at)),
+                'created_at' => $user->created_at->format('d-m-Y H:i:s'),
             ];
 
             return $this->shared->sendResponse($userData, 'Deatail user.', Response::HTTP_OK);
@@ -214,10 +210,50 @@ class UserController extends Controller
         }
     }
 
+    public function editUser(Request $request)
+    {
+        # Politica para saber si el usuario cuenta con los permisos deacuerdo a su rol asignado
+        // Gate::authorize('editAccount');
+
+        $validatedData = $request->validate([
+            'name'  => 'required|string|min:3|max:255|regex:/^[\pL\s\-]+$/u',
+            'phone' => 'required|regex:/^\(\d{3}\) \d{3}-\d{4}$/',
+            'notes' => 'required|min:5|max:2147483647',
+            'department_id' => 'required|integer|exists:departments,id',
+            'position_id' => 'required|integer|exists:positions,id',
+            'uuid' => 'required|string|uuid|exists:users,uuid',
+            
+        ]);
+
+        try {
+            $account = User::where('uuid', $validatedData['uuid'])->firstOrFail();
+            $account->name = $this->shared->clearString($validatedData['name']);
+            $account->phone = $validatedData['phone'];
+            $account->notes = $validatedData['notes'];
+            $account->department_id = $validatedData['department_id'];
+            $account->position_id = $validatedData['position_id'];
+            $account->updated_at = Carbon::now();
+            $account->save();
+
+            $userData = [
+                'name' => $account->name,
+                'phone' => $account->phone,
+                'notes' => $account->notes,
+                'department' => $account->department->name,
+                'position' => $account->position->name,
+            ];
+
+            return $this->shared->sendResponse($userData, 'Cuenta de usuario actualizada con éxito!', Response::HTTP_OK);
+        } catch (Exception $error) {
+            return $this->shared->sendError($error->getMessage(), 'Sucesio un problema intente nuevamente.', Response::HTTP_BAD_REQUEST);
+        }
+    }
+
     public function deleteUser(Request $request)
     {
         # Politica para saber si el usuario cuenta con los permisos deacuerdo a su rol asignado
         // Gate::authorize('deleteUser');
+
         $validatedData = $request->validate([
             'uuid' => 'required|string|uuid|exists:users,uuid',
         ]);
@@ -228,11 +264,33 @@ class UserController extends Controller
                 el auto borrado mediante periodos de tiempos, manteniendo el registro oculto de esta forma si se decea recuperar el 
                 registro simplemente eliminar la propiedad deleted_at
             */
-            $user = User::where('uuid', $validatedData['uuid'])->first();
-            $user->deleted_at =  Carbon::now();
+            $user = User::where('uuid', $validatedData['uuid'])->firstOrFail();
+
+            // Obtener el usuario autenticado
+            $authenticatedUser = $request->user();
+
+            // Comprobar si el usuario autenticado está intentando eliminarse a sí mismo
+            if ($authenticatedUser->uuid === $user->uuid) {
+                return $this->shared->sendError('No puedes eliminarte a ti mismo.', 403);
+            }
+
+            $user->deleted_at = Carbon::now();
+            $user->is_active = false;
             $user->save();
 
-            return $this->shared->sendResponse($user, 'Usuario eliminado con exito.');
+            $userData = [
+                'uuid' => $user->uuid,
+                'name' => $user->name,
+                'email' => $user->email,
+                'department' => $user->department->name,
+                'position' => $user->position->name,
+                'is_active' => $user->is_active,
+                'phone' => $user->phone,
+                'notes' => $user->notes,
+                'role' => optional($user->roles->first())->name ?? 'N/A',
+            ];
+
+            return $this->shared->sendResponse($userData, 'Usuario eliminado con exito.');
         } catch (Exception $error) {
             return $this->shared->sendError($error->getMessage(), 'Problemas al intentar eliminar el registro.', 404);
         }

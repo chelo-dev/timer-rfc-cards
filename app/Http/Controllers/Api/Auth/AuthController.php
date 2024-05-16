@@ -10,6 +10,7 @@ use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 
 class AuthController extends Controller
@@ -46,13 +47,13 @@ class AuthController extends Controller
                 'uuid' => Str::uuid(),
                 'name' => $this->shared->clearString($validatedData['name']),
                 'email' => $validatedData['email'],
-                'department' => $validatedData['department'],
-                'position' => $validatedData['position'],
                 'is_active' => true,
                 'last_login' => null,
                 'phone' => $validatedData['phone'],
                 'notes' => $validatedData['notes'],
-                'password' => Hash::make($validatedData['password'])
+                'password' => Hash::make($validatedData['password']),
+                'department_id' => $validatedData['department_id'],
+                'position_id' => $validatedData['position_id']
             ]);
 
             $user['acces_token'] = $user->createToken('auth_token')->plainTextToken;
@@ -82,6 +83,15 @@ class AuthController extends Controller
                 ->select('users.*')
                 ->where('email', $validatedData['email'])
                 ->firstOrFail();
+            
+            if (!$user->is_active) {
+                $userLogin = [
+                    'uuid' => $user->uuid,
+                    'name' => $user->name,
+                    'status' => $user->is_active
+                ];
+                return $this->shared->sendResponse($userLogin, 'Usuario inactivo.', Response::HTTP_LOCKED);
+            }
 
             if (!$user || !Hash::check($validatedData['password'], $user->password)) {
                 throw ValidationException::withMessages([
@@ -91,17 +101,20 @@ class AuthController extends Controller
             
             $token = $user->createToken('auth_token')->plainTextToken;
 
+            // Actualizar la fecha de inicio de session
+            $user->last_login = Carbon::now();
+            $user->save();
+
             $userData = [
                 'uuid' => $user->uuid,
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => optional($user->roles->first())->name ?? 'N/A',
-                'department' => $user->department,
-                'position' => $user->position,
+                'department' => $user->department->name,
+                'position' => $user->position->name,
                 'is_active' => $user->is_active,
                 'last_login' => $user->last_login,
                 'phone' => $user->phone,
-                'notes' => $user->notes,
                 'access_token' =>  $token,
                 'token_type' => 'Bearer',
                 'created_at' => date('d-m-Y H:i:s', strtotime($user->created_at)),
