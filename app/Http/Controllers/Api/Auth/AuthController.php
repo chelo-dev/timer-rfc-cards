@@ -119,7 +119,7 @@ class AuthController extends Controller
                 'token_type' => 'Bearer',
                 'created_at' => date('d-m-Y H:i:s', strtotime($user->created_at)),
             ];
-
+            
             return $this->shared->sendResponse($userData, 'Acceso completado con exito.', Response::HTTP_ACCEPTED);
         } catch (Exception $error) {
             return $this->shared->sendError($this->shared->messageRegisterError(), ['error_detail' => $error->getMessage()]);

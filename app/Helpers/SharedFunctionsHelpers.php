@@ -20,12 +20,12 @@ class SharedFunctionsHelpers
      * @param int $code
      * @return \Illuminate\Http\JsonResponse
      */
-    public static function sendResponse($data, $message = '', $code = Response::HTTP_OK)
+    public static function sendResponse($data = [], $message = '', $code = Response::HTTP_OK)
     {
         $response = [
             'success' => true,
-            'data'    => $data,
             'message' => $message,
+            'data' => $data
         ];
 
         return response()->json($response, $code);
@@ -47,7 +47,7 @@ class SharedFunctionsHelpers
         ];
 
         if (!empty($errorMessages))
-            $response['data'] = $errorMessages;
+            $response['errors'] = $errorMessages;
 
         return response()->json($response, $code);
     }

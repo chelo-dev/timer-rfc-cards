@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ScheduleEntrie\ScheduleEntrieController;
 use App\Http\Controllers\administration\User\UserController;
 use App\Http\Controllers\Department\DepartmentController;
 use App\Http\Controllers\Position\PositionController;
@@ -25,7 +26,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
-# Administracion de empresa
+# Administracion de cuenta de usuarios
 Route::prefix('administration')->middleware('auth:sanctum')->controller(UserController::class)->group(function () {
     Route::post('/obtener-cuenta', 'getAccount');
     Route::post('/editar-cuenta', 'editAccount');
@@ -38,6 +39,8 @@ Route::prefix('administration')->middleware('auth:sanctum')->controller(UserCont
     Route::post('/registro-usuario', 'createUser');
     Route::post('/editar-usuario', 'editUser');
     Route::post('/eliminar-usuario', 'deleteUser');
+    Route::post('/importar-usuarios', 'importUsers');
+    Route::post('/exportar-usuarios', 'exportUsers');
 });
 
 // Administración de Departamentos
@@ -56,4 +59,10 @@ Route::prefix('administration')->middleware('auth:sanctum')->controller(Position
     Route::post('/registro-posicion', 'createPosition');
     Route::post('/editar-posicion', 'editPosition');
     Route::post('/eliminar-posicion', 'deletePosition');
+});
+
+// Administración de Posiciones
+Route::prefix('administration')->controller(ScheduleEntrieController::class)->group(function () {
+    Route::post('/checkIn', 'checkIn');
+    Route::post('/checkOut', 'checkOut');
 });

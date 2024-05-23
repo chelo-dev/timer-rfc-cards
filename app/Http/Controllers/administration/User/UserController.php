@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers\administration\User;
 
+use Illuminate\Validation\ValidationException;
 use App\Helpers\SharedFunctionsHelpers;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
+use App\Exports\UsersExport;
 use Illuminate\Http\Request;
+use App\Imports\UsersImport;
 use Illuminate\Support\Str;
 use App\Models\User;
 use Carbon\Carbon;
@@ -105,28 +110,7 @@ class UserController extends Controller
 
     public function listUser()
     {
-        $userData = [];
-        $users = User::with('roles', 'department', 'position')
-            ->whereNull('deleted_at')
-            ->orderByDesc('id')
-            ->get();
-
-        foreach ($users as $user) {
-            $userData[] = [
-                'uuid' => $user->uuid,
-                'name' => $user->name,
-                'email' => $user->email,
-                'department' => $user->department->name,
-                'position' => $user->position->name,
-                'is_active' => $user->is_active,
-                'phone' => $user->phone,
-                'notes' => $user->notes,
-                'last_login' => isNull($user->last_login) ? 'N/A' : date('d-m-Y H:i:s', strtotime($user->last_login)),
-                'role' => optional($user->roles->first())->name ?? 'N/A',
-                'created_at' => date('d-m-Y', strtotime($user->created_at)),
-                'updated_at' => date('d-m-Y', strtotime($user->updated_at))
-            ];
-        }
+        $userData = $this->getListUser();
 
         return $this->shared->sendResponse($userData, 'Catalogo de cuentas de usuarios!', Response::HTTP_OK);
     }
@@ -222,7 +206,6 @@ class UserController extends Controller
             'department_id' => 'required|integer|exists:departments,id',
             'position_id' => 'required|integer|exists:positions,id',
             'uuid' => 'required|string|uuid|exists:users,uuid',
-            
         ]);
 
         try {
@@ -292,7 +275,115 @@ class UserController extends Controller
 
             return $this->shared->sendResponse($userData, 'Usuario eliminado con exito.');
         } catch (Exception $error) {
-            return $this->shared->sendError($error->getMessage(), 'Problemas al intentar eliminar el registro.', 404);
+            return $this->shared->sendError($error->getMessage(), 'Problemas al intentar eliminar el registro.', Response::HTTP_BAD_REQUEST);
         }
+    }
+
+    public function importUsers(Request $request)
+    {
+        try {
+            $validatedData = $request->validate([
+                'uuid' => 'required|string|uuid|exists:users,uuid',
+                'file' => 'required|file|mimes:xlsx,csv|max:204800'
+            ]);
+
+            $user = User::where('uuid', $validatedData['uuid'])->firstOrFail();
+
+            // Obtener el usuario autenticado
+            $authenticatedUser = $request->user();
+
+            if ($authenticatedUser->uuid != $user->uuid) {
+                return $this->shared->sendError('No cuentas con los permisos para importar el catalogo de usuarios.', Response::HTTP_BAD_REQUEST);
+            }
+
+            set_time_limit(0);
+
+            Excel::import(new UsersImport, request()->file('file'));
+            return $this->shared->sendResponse([], 'Catalogo importado con exito.');
+        } catch (ValidationException $e) {
+            return $this->shared->sendError('Errores de validación', $e->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
+        } catch (Exception $error) {
+            return $this->shared->sendError('Problemas al intentar importar el catalogo.', $error->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function exportUsers(Request $request)
+    {
+        $validatedData = $request->validate([
+            'uuid' => 'required|string|uuid|exists:users,uuid',
+            'format' => 'required|string|in:pdf,excel,csv'
+        ]);
+
+        $user = User::where('uuid', $validatedData['uuid'])->firstOrFail();
+
+        // Obtener el usuario autenticado
+        $authenticatedUser = $request->user();
+
+        if ($authenticatedUser->uuid != $user->uuid) {
+            return $this->shared->sendError('No cuentas con los permisos para exportar el catalogo de usuarios.', Response::HTTP_BAD_REQUEST);
+        }
+
+        set_time_limit(0);
+        try {
+            switch ($request->format) {
+                case 'pdf':
+                    $users = $this->getListUser();
+                    $landscape = true;
+                    
+                    $pdf = PDF::loadView('reports.pdf.lists_users', compact('users', 'landscape'))
+                        ->setPaper('a4', 'landscape')
+                        ->setOption("isPhpEnabled", true)
+                        ->setOption('margin-top', 5)
+                        ->setOption('margin-bottom', 5);
+
+                    return $pdf->download('Catalogo_de_usuarios_' . date('d_m_Y', strtotime(now())) . '.pdf');
+                case 'excel':
+                    return Excel::download(
+                        new UsersExport,
+                        'Catalogo_de_usuarios_' . date('d_m_Y', strtotime(now())) . '.xlsx',
+                        \Maatwebsite\Excel\Excel::XLSX
+                    );
+                    break;
+                case 'csv':
+                    return Excel::download(
+                        new UsersExport,
+                        'Catalogo_de_usuarios_' . date('d_m_Y', strtotime(now())) . '.csv',
+                        \Maatwebsite\Excel\Excel::CSV
+                    );
+                    break;
+
+                default:
+                    // PENDIENTE...
+                    break;
+            }
+        } catch (Exception $error) {
+            return $this->shared->sendError($error->getMessage(), 'Problemas al intentar exportar el documento.', Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function getListUser()
+    {
+        $users = User::with(['roles', 'department', 'position'])
+            ->whereNull('deleted_at')
+            ->orderByDesc('id')
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'uuid' => $user->uuid,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'department' => optional($user->department)->name,
+                    'position' => optional($user->position)->name,
+                    'is_active' => $user->is_active,
+                    'phone' => $user->phone,
+                    'notes' => $user->notes,
+                    'last_login' => is_null($user->last_login) ? 'N/A' : date('d-m-Y H:i:s', strtotime($user->last_login)),
+                    'role' => optional($user->roles->first())->name ?? 'N/A',
+                    'created_at' => date('d-m-Y', strtotime($user->created_at)),
+                    'updated_at' => date('d-m-Y', strtotime($user->updated_at))
+                ];
+            });
+
+        return $users;
     }
 }

@@ -1,0 +1,38 @@
+{
+    "unicons": {
+        "normal": "unicons_normal_983e3bf0456ef5613efc7e261c8bb6b4"
+    },
+    "dripicons-v2": {
+        "normal": "dripicons_v2_normal_5d15efc3b9c223aa7f992d3014b579b1"
+    },
+    "material design icons": {
+        "normal": "material_design_icons_normal_6e4b32d90dcae2fafbd44114cccbf681"
+    },
+    "nunito": {
+        "300": "\/home\/kharma\/www\/Laravel\/khs-check-nfc\/storage\/fonts\/nunito_300_baccd256f5427ab27501a342f7bda27f",
+        "normal": "\/home\/kharma\/www\/Laravel\/khs-check-nfc\/storage\/fonts\/nunito_normal_785c0a8829b8b421ad8b83afd222308e",
+        "600": "\/home\/kharma\/www\/Laravel\/khs-check-nfc\/storage\/fonts\/nunito_600_77cd0267093284a0b4232c0e6c72ff03",
+        "bold": "nunito_bold_90196aaf2e5056308dcf4552103404b2"
+    },
+    "summernote": {
+        "normal": "summernote_normal_57df39c1eeecaa66229de7743f1999b3"
+    },
+    "lato": {
+        "normal": "lato_normal_51116b245f08d5e5cdb537d25637e400"
+    },
+    "montserrat": {
+        "normal": "montserrat_normal_b74b751c20b429298921949795391ef1"
+    },
+    "pt sans": {
+        "normal": "pt_sans_normal_fa52bdbac54dbb0189884934fe13d6a1"
+    },
+    "poppins": {
+        "300": "poppins_300_4a08cccbc2911e3077321a0298f4e093"
+    },
+    "roboto": {
+        "300": "roboto_300_32acfcb296f555e063ebba2be7db9e2f"
+    },
+    "source sans pro": {
+        "300": "source_sans_pro_300_fa242cbd7e539b7709927946cf9c0069"
+    }
+}
