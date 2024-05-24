@@ -50,6 +50,8 @@ Route::prefix('administration')->middleware('auth:sanctum')->controller(Departme
     Route::post('/registro-departamento', 'createDepartment');
     Route::post('/editar-departamento', 'editDepartment');
     Route::post('/eliminar-departamento', 'deleteDepartment');
+    Route::post('/importar-departamentos', 'importDepartments');
+    Route::post('/exportar-departamentos', 'exportDepartments');
 });
 
 // Administración de Posiciones

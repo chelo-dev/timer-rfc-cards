@@ -2,13 +2,10 @@
 
 namespace App\Exports;
 
-use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\FromView;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\DB;
 use App\Models\User;
-use Illuminate\Support\Facades\Log;
 
 class UsersExport implements FromView, ShouldAutoSize
 {

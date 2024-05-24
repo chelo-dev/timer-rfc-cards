@@ -8,12 +8,12 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\Importable;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Collection;
+use App\Rules\NormalizedExists;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use App\Models\Department;
 use App\Models\Position;
 use App\Models\User;
-use App\Rules\NormalizedExists;
 
 class UsersImport implements ToCollection, WithHeadingRow, WithValidation
 {
