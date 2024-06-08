@@ -1,0 +1,11 @@
+NOMBRE COMPLETO,EMAIL,DEPARTAMENTO,POSICION,TELEFONO,COMENTARIOS,CONTRASENIA
+Juan Pérez,juan.perez@example.com,soporte tecnico,maestro,1234567890,Ningún comentario,abc123456
+Ana López,ana.lopez@example.com,soporte tecnico,maestro,2345678901,,def123456
+Miguel Gómez,miguel.gomez@example.com,soporte tecnico,maestro,3456789012,Requiere seguimiento,ghi123456
+Laura Martínez,laura.martinez@example.com,soporte tecnico,maestro,4567890123,,jkl123456
+Pedro Juárez,pedro.juarez@example.com,soporte tecnico,maestro,5678901234,Verificar datos,mno123456
+Carla Espinosa,carla.espinosa@example.com,sistemas computacionales,soporte tecnico,6789012345,,pqr123456
+José Ramírez,jose.ramirez@example.com,sistemas computacionales,soporte tecnico,7890123456,Urgente,stu123456
+Lucía Hernández,lucia.hernandez@example.com,sistemas computacionales,soporte tecnico,8901234567,,vwx123456
+Manuel Torres,manuel.torres@example.com,sistemas computacionales,soporte tecnico,9012345678,Prioritario,yz123456
+Sofía Castro,sofia.castro@example.com,sistemas computacionales,soporte tecnico,1234567890,No urgente,abc123456
