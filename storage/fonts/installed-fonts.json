@@ -9,13 +9,13 @@
         "normal": "material_design_icons_normal_6e4b32d90dcae2fafbd44114cccbf681"
     },
     "nunito": {
-        "300": "\/home\/kharma\/www\/Laravel\/khs-check-nfc\/storage\/fonts\/nunito_300_baccd256f5427ab27501a342f7bda27f",
-        "normal": "\/home\/kharma\/www\/Laravel\/khs-check-nfc\/storage\/fonts\/nunito_normal_785c0a8829b8b421ad8b83afd222308e",
-        "600": "\/home\/kharma\/www\/Laravel\/khs-check-nfc\/storage\/fonts\/nunito_600_77cd0267093284a0b4232c0e6c72ff03",
-        "bold": "nunito_bold_90196aaf2e5056308dcf4552103404b2"
+        "300": "\/home\/rocket\/www\/Laravel\/timer-rfc-cards\/storage\/fonts\/nunito_300_11b3ff4409db50cf8dc1324a55eb9793",
+        "normal": "\/home\/rocket\/www\/Laravel\/timer-rfc-cards\/storage\/fonts\/nunito_normal_44574a837a2312a80eb4fd6a2c52a48a",
+        "600": "\/home\/rocket\/www\/Laravel\/timer-rfc-cards\/storage\/fonts\/nunito_600_77ea43b125b3a1f2a329cbb6942bdd42",
+        "bold": "nunito_bold_9322218a22b511a462937436f0e55580"
     },
     "summernote": {
-        "normal": "summernote_normal_57df39c1eeecaa66229de7743f1999b3"
+        "normal": "summernote_normal_77972224656bae520f9a43040826a175"
     },
     "lato": {
         "normal": "lato_normal_51116b245f08d5e5cdb537d25637e400"

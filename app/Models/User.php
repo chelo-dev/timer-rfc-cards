@@ -65,4 +65,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Department::class, 'id', 'position_id');
     }
+
+    public function scheduleEntries()
+    {
+        return $this->hasMany(ScheduleEntry::class);
+    }
 }

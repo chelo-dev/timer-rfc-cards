@@ -31,4 +31,14 @@ class ScheduleEntry extends Model
      * @var array<int, string>
      */
     protected $hidden = [];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function histories()
+    {
+        return $this->hasMany(History::class, 'schedule_entrie_id');
+    }
 }

@@ -31,4 +31,9 @@ class History extends Model
      * @var array<int, string>
      */
     protected $hidden = [];
+
+    public function scheduleEntry()
+    {
+        return $this->belongsTo(ScheduleEntry::class, 'schedule_entrie_id');
+    }
 }

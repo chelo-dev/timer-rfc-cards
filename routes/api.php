@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ScheduleEntrie\ScheduleEntrieController;
 use App\Http\Controllers\administration\User\UserController;
+use App\Http\Controllers\ScheduleEntrie\HistoryController;
 use App\Http\Controllers\Department\DepartmentController;
 use App\Http\Controllers\Position\PositionController;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -67,4 +68,9 @@ Route::prefix('administration')->middleware('auth:sanctum')->controller(Position
 Route::prefix('administration')->controller(ScheduleEntrieController::class)->group(function () {
     Route::post('/checkIn', 'checkIn');
     Route::post('/checkOut', 'checkOut');
+});
+
+// Administración historico de check-in
+Route::prefix('history')->middleware('auth:sanctum')->controller(HistoryController::class)->group(function () {
+    Route::get('/checkIn', 'checkInHistory');
 });
