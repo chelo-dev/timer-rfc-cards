@@ -35,13 +35,13 @@ class ScheduleEntrieController extends Controller
 
         $user = User::where('uuid', $validatedData['uuid'])->firstOrFail();
         $now = Carbon::now();
-        
+
         // Obtener el horario programado para hoy
         $schedule = ScheduleEntry::where('user_id', $user->id)
-            ->where('schedule_date', $now->toDateString())
             ->first();
 
         if (!$schedule) {
+            // Si no cuenta con un horario programdo no pasa nada
             return $this->shared->sendError('No se encontró ningún horario programado para hoy.');
         }
 
@@ -50,8 +50,17 @@ class ScheduleEntrieController extends Controller
         $gracePeriodEnd = $scheduledTime->copy()->addMinutes($schedule->grace_period_minutes);
 
         if ($now->lessThan($scheduledTime) || $now->greaterThan($gracePeriodEnd)) {
-            return $this->shared->sendError('Esta fuera del horario programado.', 403);
+            // Si esta fuera del horario registralo como un retardo
+            // return $this->shared->sendError('Esta fuera del horario programado.', 403);
         }
+
+        // Validar solo una vez el check-in, de lo contrario enviar una alerta de que intento hacer mas de una vez check-in
+        // Solo aplica para el dia actual
+        $check_is_active = History::where('schedule_entrie_id', $schedule->id)
+            ->firstOrFail();
+
+
+
 
         // Registrar check-in
         // Aquí iría la lógica para registrar la hora de entrada en `histories`
@@ -59,7 +68,8 @@ class ScheduleEntrieController extends Controller
             'uuid' => Str::uuid(),
             'schedule_entrie_id' => $schedule->id,
             'check_in_time' => $now,
-            'type' => 'check-in'
+            'type' => 'check-in',
+            'check_is_active' => true
         ]);
 
         return $this->shared->sendResponse([], 'Registro exitoso.');
@@ -80,7 +90,7 @@ class ScheduleEntrieController extends Controller
             ->first();
 
         if (!$schedule) {
-            return $this->shared->sendError('No se encontró ningún horario programado para hoy.');
+            // return $this->shared->sendError('No se encontró ningún horario programado para hoy.');:
         }
 
         // Validar hora de salida con margen de gracia

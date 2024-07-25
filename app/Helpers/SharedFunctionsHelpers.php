@@ -25,7 +25,7 @@ class SharedFunctionsHelpers
         $response = [
             'success' => true,
             'message' => $message,
-            'data' => $data
+            'data' => $data 
         ];
 
         return response()->json($response, $code);

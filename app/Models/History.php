@@ -22,7 +22,8 @@ class History extends Model
         'check_in_time',
         'check_out_time',
         'type',
-        'notes'
+        'notes',
+        'check_date_at'
     ];
 
     /**
